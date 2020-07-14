@@ -10,6 +10,7 @@ if (!!$.prototype.justifiedGallery) {
   $(".article-gallery").justifiedGallery(options);
 }
 
+
 $(document).ready(function() {
 
   /**
